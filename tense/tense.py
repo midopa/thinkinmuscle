@@ -10,8 +10,7 @@ mnist = input_data.read_data_sets('mnist_data', one_hot=True)
 learning_rate = 1e-4
 epochs = 1
 iterations = 20000
-batch_size = 500
-val_batch_size = 500
+batch_size = 50
 
 
 def make_weights(shape):
@@ -52,18 +51,18 @@ def add_layer(weights_shape, activation, input_override=None):
 x = tf.placeholder(tf.float32, [None, 784])
 x_img = tf.reshape(x, [-1, 28, 28, 1])
 
-# # simple, layered, fully connected neural net
+# simple, layered, fully connected neural net
 # add_layer(
-#     [784, 500],
+#     [784, 1024],
 #     lambda y, W, b: tf.nn.relu(tf.matmul(y, W) + b),
 #     input_override=x
 # )
 # add_layer(
-#     [500, 300],
+#     [1024, 512],
 #     lambda y, W, b: tf.nn.relu(tf.matmul(y, W) + b)
 # )
 # add_layer(
-#     [300, 100],
+#     [512, 100],
 #     lambda y, W, b: tf.nn.relu(tf.matmul(y, W) + b)
 # )
 # add_layer(
@@ -78,13 +77,11 @@ add_layer(
     lambda y, W, b: max_pool(tf.nn.relu(conv(y, W) + b)),
     input_override=x_img
 )
-
 # convolution and max pooling
 add_layer(
     [5, 5, 32, 64],
     lambda y, W, b: max_pool(tf.nn.relu(conv(y, W) + b))
 )
-
 # dense network, flatten convolution outputs
 # reshape the image outputs into a vector
 add_layer(
@@ -92,7 +89,6 @@ add_layer(
     lambda y, W, b: tf.nn.relu(tf.matmul(y, W) + b),
     input_override=tf.reshape(ys[-1], [-1, 7 * 7 * 64])
 )
-
 # output layer
 add_layer(
     [1024, 10],
@@ -118,16 +114,24 @@ tf.initialize_all_variables().run()
 t_start = time.time()
 
 
-def check_accuracy(step, input, actual):
-    train_acc = accuracy.eval(feed_dict={x: input, a: actual})
-    input, actual = mnist.validation.next_batch(val_batch_size)
-    val_acc = accuracy.eval(feed_dict={x: input, a: actual})
+def check_test():
     t_now = time.time() - t_start
-    print('{:0.3f}s: step {}, train acc {:0.3f}, val acc {:0.3f}'.format(t_now, step, train_acc, val_acc))
+    test_acc = accuracy.eval(feed_dict={x: mnist.test.images, a: mnist.test.labels})
+    print('{:0.1f}s: done, test acc {:0.3f}'.format(t_now, test_acc))
+
+
+def check_accuracy(step, in_x, actual):
+    train_acc = accuracy.eval(feed_dict={x: in_x, a: actual})
+    in_x, actual = mnist.validation.next_batch(batch_size)
+    val_acc = accuracy.eval(feed_dict={x: in_x, a: actual})
+    t_now = time.time() - t_start
+    print('{:0.1f}s: step {}, train acc {:0.3f}, val acc {:0.3f}'.format(t_now, step, train_acc, val_acc))
 
 
 def signal_handler(sig_num, frame):
-    check_accuracy('aborted', mnist.test.images, mnist.test.labels)
+    t_now = time.time() - t_start
+    print('{:0.1f}s: aborted'.format(t_now))
+    check_test()
     sys.exit(1)
 signal.signal(signal.SIGINT, signal_handler)
 
@@ -135,9 +139,9 @@ signal.signal(signal.SIGINT, signal_handler)
 for i in range(iterations):
     batch_x, batch_a = mnist.train.next_batch(batch_size)
 
-    if i % 33 == 0:
+    if i % 100 == 0:
         check_accuracy(i, batch_x, batch_a)
 
     sess.run(train_step, feed_dict={x: batch_x, a: batch_a})
 
-check_accuracy('complete', mnist.test.images, mnist.test.labels)
+check_test()
