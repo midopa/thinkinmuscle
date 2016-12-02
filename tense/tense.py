@@ -1,8 +1,7 @@
 import signal
-import time
-
 import sys
-from typing import List, Callable
+import time
+from typing import List, Callable, Tuple
 
 import tensorflow as tf
 from tensorflow.examples.tutorials.mnist import input_data
@@ -15,12 +14,12 @@ iterations = 20000
 batch_size = 50
 
 
-def make_weights(shape):
+def make_weights(shape: List[int]) -> tf.Variable:
     init = tf.truncated_normal(shape, stddev=0.1)
     return tf.Variable(init)
 
 
-def make_bias(shape):
+def make_bias(shape: List[int]) -> tf.Variable:
     init = tf.constant(0.1, shape=shape)
     return tf.Variable(init)
 
@@ -34,16 +33,16 @@ def max_pool(x):
 
 
 # layers of weights, biases, and outputs
-Ws = []
-bs = []
-ys = []
+Ws = []  # type: List[tf.Variable]
+bs = []  # type: List[tf.Variable]
+ys = []  # type: List[tf.Tensor]
 
 
 def add_layer(
         weights_shape: List[int],
         activation: Callable[[tf.Tensor, tf.Variable, tf.Variable], tf.Tensor],
         input_override: tf.Variable = None
-):
+) -> Tuple[tf.Variable, tf.Variable, tf.Tensor]:
     """
     adds a layer to the neural net.
     TODO check compatibility with the previous layer's shape.
