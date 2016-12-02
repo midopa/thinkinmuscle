@@ -2,6 +2,8 @@ import signal
 import time
 
 import sys
+from typing import List, Callable
+
 import tensorflow as tf
 from tensorflow.examples.tutorials.mnist import input_data
 
@@ -37,12 +39,31 @@ bs = []
 ys = []
 
 
-def add_layer(weights_shape, activation, input_override=None):
+def add_layer(
+        weights_shape: List[int],
+        activation: Callable[[tf.Tensor, tf.Variable, tf.Variable], tf.Tensor],
+        input_override: tf.Variable = None
+):
+    """
+    adds a layer to the neural net.
+    TODO check compatibility with the previous layer's shape.
+
+    :param weights_shape: shape of the weights. the last element is used as the
+        shape of the bias vector
+    :param activation: function that will generate/provide a tensor op that will
+        be used as the activation function for the nodes in this layer. it gets
+        provided the input tensor and previous weights and biases
+    :param input_override: if given, will be passed as input to the activation
+        function, instead of the previous layer's output.
+    :return: latest weights, bias, and output
+    """
     Ws.append(make_weights(weights_shape))
     bs.append(make_bias([weights_shape[-1]]))
 
     input_tensor = ys[-1] if input_override is None else input_override
     ys.append(activation(input_tensor, Ws[-1], bs[-1]))
+
+    activation(input_tensor, Ws[-1], bs[-1])
 
     return Ws[-1], bs[-1], ys[-1]
 
@@ -115,8 +136,8 @@ t_start = time.time()
 
 
 def check_test():
-    t_now = time.time() - t_start
     test_acc = accuracy.eval(feed_dict={x: mnist.test.images, a: mnist.test.labels})
+    t_now = time.time() - t_start
     print('{:0.1f}s: done, test acc {:0.3f}'.format(t_now, test_acc))
 
 
