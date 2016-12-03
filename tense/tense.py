@@ -130,7 +130,7 @@ correct_prediction = tf.equal(tf.argmax(y_out, 1), tf.argmax(a, 1))
 accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
 
 sess = tf.InteractiveSession()
-tf.initialize_all_variables().run()
+tf.global_variables_initializer().run()
 t_start = time.time()
 
 
