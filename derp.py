@@ -1,12 +1,21 @@
 #!/usr/bin/env python
+import logging
 import signal
 import sys
-import time
 
+import coloredlogs
 import tensorflow as tf
 from tensorflow.examples.tutorials.mnist import input_data
 
 from tense.tense import ThinkinMuscle
+
+coloredlogs.install(
+    level='debug',
+    fmt='%(asctime)s %(levelname)s %(message)s',
+    datefmt='%H:%M:%S'
+)
+logging.getLogger(name='tensorflow').setLevel(logging.INFO)
+log = logging.getLogger(name='derp')
 
 
 def conv(x, W):
@@ -25,7 +34,6 @@ iterations = 20000
 batch_size = 50
 
 network = ThinkinMuscle()
-t_start = time.time()
 
 # reshape input image into an actual image
 x = tf.placeholder(tf.float32, [None, 784])
@@ -89,16 +97,14 @@ accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
 
 def check_test():
     test_acc = accuracy.eval(feed_dict={x: mnist.test.images, a: mnist.test.labels})
-    t_now = time.time() - t_start
-    print('{:0.1f}s: done, test acc {:0.3f}'.format(t_now, test_acc))
+    log.info('done, test acc {:0.3f}'.format(test_acc))
 
 
 def check_accuracy(step, in_x, actual):
     train_acc = accuracy.eval(feed_dict={x: in_x, a: actual})
     in_x, actual = mnist.validation.next_batch(batch_size)
     val_acc = accuracy.eval(feed_dict={x: in_x, a: actual})
-    t_now = time.time() - t_start
-    print('{:0.1f}s: step {}, train acc {:0.3f}, val acc {:0.3f}'.format(t_now, step, train_acc, val_acc))
+    log.debug('step {}, train acc {:0.3f}, val acc {:0.3f}'.format(step, train_acc, val_acc))
 
 
 def signal_handler(sig_num, frame):
@@ -106,8 +112,7 @@ def signal_handler(sig_num, frame):
     executes if the program is interrupted (ctrl+c) and does a check against the
     test set.
     """
-    t_now = time.time() - t_start
-    print('{:0.1f}s: aborted'.format(t_now))
+    log.info('aborted')
     check_test()
     sys.exit(1)
 signal.signal(signal.SIGINT, signal_handler)
