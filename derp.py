@@ -88,7 +88,7 @@ network.add_layer(
 network.add_layer(
     [7 * 7 * 64, 1024],
     lambda y, W, b: tf.nn.relu(tf.matmul(y, W) + b),
-    input_override=tf.reshape(network.ys[-1], [-1, 7 * 7 * 64])
+    input_override=tf.reshape(network.output(), [-1, 7 * 7 * 64])
 )
 # output layer
 network.add_layer(
