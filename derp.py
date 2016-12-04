@@ -49,6 +49,8 @@ network = ThinkinMuscle()
 # reshape input image into an actual image
 x = tf.placeholder(tf.float32, [None, 784])
 x_img = tf.reshape(x, [-1, 28, 28, 1])
+# actual output, labels
+a = tf.placeholder(tf.float32, [None, 10])
 
 # simple, layered, fully connected neural net
 # network.add_layer(
@@ -93,9 +95,6 @@ network.add_layer(
     [1024, 10],
     lambda y, W, b: tf.matmul(y, W) + b
 )
-
-# actual output, labels
-a = tf.placeholder(tf.float32, [None, 10])
 
 # training
 y_out = network.output()
