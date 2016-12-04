@@ -107,6 +107,7 @@ accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
 
 
 def check_test():
+    log.info('checking against test set...')
     test_acc = accuracy.eval(feed_dict={x: mnist.test.images, expect: mnist.test.labels})
     log.info('done, test acc {:0.3f}'.format(test_acc))
 
