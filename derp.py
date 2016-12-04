@@ -4,6 +4,7 @@ import signal
 import sys
 
 import coloredlogs
+import matplotlib
 import tensorflow as tf
 from tensorflow.examples.tutorials.mnist import input_data
 
@@ -12,10 +13,16 @@ from tense.tense import ThinkinMuscle
 coloredlogs.install(
     level='debug',
     fmt='%(asctime)s %(levelname)s %(message)s',
-    datefmt='%H:%M:%S'
+    datefmt='%H:%M:%S',
+    isatty=True
 )
 logging.getLogger(name='tensorflow').setLevel(logging.INFO)
 log = logging.getLogger(name='derp')
+
+matplotlib.use('tkagg')
+# important for this to be after setting the backend
+from matplotlib import pyplot
+pyplot.ion()
 
 
 def conv(x, W):
@@ -32,6 +39,10 @@ learning_rate = 1e-4
 epochs = 1
 iterations = 20000
 batch_size = 50
+acc_check_steps = 50
+plot_samples = []
+plot_train_acc = []
+plot_val_acc = []
 
 network = ThinkinMuscle()
 
@@ -106,6 +117,15 @@ def check_accuracy(step, in_x, actual):
     val_acc = accuracy.eval(feed_dict={x: in_x, a: actual})
     log.debug('step {}, train acc {:0.3f}, val acc {:0.3f}'.format(step, train_acc, val_acc))
 
+    plot_samples.append(step)
+    plot_train_acc.append(train_acc)
+    plot_val_acc.append(val_acc)
+    pyplot.cla()
+    pyplot.plot(plot_samples, plot_train_acc, 'b-o', label='training acc')
+    pyplot.plot(plot_samples, plot_val_acc, 'r-o', label='val acc')
+    pyplot.legend(loc='upper left')
+    pyplot.pause(1e-3)
+
 
 def signal_handler(sig_num, frame):
     """
@@ -123,7 +143,7 @@ tf.global_variables_initializer().run()
 for i in range(iterations):
     batch_x, batch_a = mnist.train.next_batch(batch_size)
 
-    if i % 100 == 0:
+    if i % acc_check_steps == 0:
         check_accuracy(i, batch_x, batch_a)
 
     sess.run(train_step, feed_dict={x: batch_x, a: batch_a})
