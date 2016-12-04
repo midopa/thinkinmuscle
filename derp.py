@@ -46,7 +46,7 @@ plot_val_acc = []
 
 network = ThinkinMuscle()
 
-# reshape input image into an actual image
+# reshape input image into an actual image for convolution layers
 x = tf.placeholder(tf.float32, [None, 784])
 x_img = tf.reshape(x, [-1, 28, 28, 1])
 # expected output, labels
