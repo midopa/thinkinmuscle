@@ -121,9 +121,9 @@ def check_accuracy(step, in_x, actual):
     plot_train_acc.append(train_acc)
     plot_val_acc.append(val_acc)
     pyplot.cla()
-    pyplot.plot(plot_samples, plot_train_acc, 'b-o', label='training acc')
-    pyplot.plot(plot_samples, plot_val_acc, 'r-o', label='val acc')
-    pyplot.legend(loc='upper left')
+    pyplot.plot(plot_samples, plot_train_acc, 'b-+', label='training acc')
+    pyplot.plot(plot_samples, plot_val_acc, 'r-+', label='val acc')
+    pyplot.legend(loc='lower right')
     pyplot.pause(1e-3)
 
 
