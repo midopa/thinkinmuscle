@@ -36,10 +36,10 @@ def max_pool(x):
 mnist = input_data.read_data_sets('mnist_data', one_hot=True)
 
 learning_rate = 1e-4
-epochs = 1
-iterations = 20000
+epochs = 3
 batch_size = 50
-acc_check_steps = 50
+iterations = int(mnist.train.num_examples/batch_size)
+acc_check_steps = 100
 plot_samples = []
 plot_train_acc = []
 plot_val_acc = []
@@ -140,12 +140,18 @@ signal.signal(signal.SIGINT, signal_handler)
 sess = tf.InteractiveSession()
 tf.global_variables_initializer().run()
 
-for i in range(iterations):
-    batch_x, batch_a = mnist.train.next_batch(batch_size)
+for e in range(epochs):
+    plot_samples.clear()
+    plot_train_acc.clear()
+    plot_val_acc.clear()
+    pyplot.cla()
 
-    if i % acc_check_steps == 0:
-        check_accuracy(i, batch_x, batch_a)
+    for i in range(iterations):
+        batch_x, batch_a = mnist.train.next_batch(batch_size)
 
-    sess.run(train_step, feed_dict={x: batch_x, a: batch_a})
+        if i % acc_check_steps == 0:
+            check_accuracy(i, batch_x, batch_a)
 
-check_test()
+        sess.run(train_step, feed_dict={x: batch_x, a: batch_a})
+
+    check_test()
