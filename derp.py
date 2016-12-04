@@ -89,7 +89,7 @@ network.add_layer(
     input_override=tf.reshape(network.ys[-1], [-1, 7 * 7 * 64])
 )
 # output layer
-_, __, y_out = network.add_layer(
+network.add_layer(
     [1024, 10],
     lambda y, W, b: tf.matmul(y, W) + b
 )
@@ -98,6 +98,7 @@ _, __, y_out = network.add_layer(
 a = tf.placeholder(tf.float32, [None, 10])
 
 # training
+y_out = network.output()
 cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(y_out, a))
 train_step = tf.train.AdamOptimizer(learning_rate).minimize(cross_entropy)
 

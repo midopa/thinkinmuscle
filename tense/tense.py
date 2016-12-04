@@ -58,3 +58,9 @@ class ThinkinMuscle:
         activation(input_tensor, self.Ws[-1], self.bs[-1])
 
         return self.Ws[-1], self.bs[-1], self.ys[-1]
+
+    def output(self) -> tf.Tensor:
+        """
+        :return: the last tensor layer in the network
+        """
+        return self.ys[-1]
