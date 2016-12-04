@@ -49,8 +49,8 @@ network = ThinkinMuscle()
 # reshape input image into an actual image
 x = tf.placeholder(tf.float32, [None, 784])
 x_img = tf.reshape(x, [-1, 28, 28, 1])
-# actual output, labels
-a = tf.placeholder(tf.float32, [None, 10])
+# expected output, labels
+expect = tf.placeholder(tf.float32, [None, 10])
 
 # simple, layered, fully connected neural net
 # network.add_layer(
@@ -97,24 +97,24 @@ network.add_layer(
 )
 
 # training
-y_out = network.output()
-cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(y_out, a))
+a = network.output()
+cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(a, expect))
 train_step = tf.train.AdamOptimizer(learning_rate).minimize(cross_entropy)
 
 # debugging
-correct_prediction = tf.equal(tf.argmax(y_out, 1), tf.argmax(a, 1))
+correct_prediction = tf.equal(tf.argmax(a, 1), tf.argmax(expect, 1))
 accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
 
 
 def check_test():
-    test_acc = accuracy.eval(feed_dict={x: mnist.test.images, a: mnist.test.labels})
+    test_acc = accuracy.eval(feed_dict={x: mnist.test.images, expect: mnist.test.labels})
     log.info('done, test acc {:0.3f}'.format(test_acc))
 
 
 def check_accuracy(step, in_x, actual):
-    train_acc = accuracy.eval(feed_dict={x: in_x, a: actual})
+    train_acc = accuracy.eval(feed_dict={x: in_x, expect: actual})
     in_x, actual = mnist.validation.next_batch(batch_size)
-    val_acc = accuracy.eval(feed_dict={x: in_x, a: actual})
+    val_acc = accuracy.eval(feed_dict={x: in_x, expect: actual})
     log.debug('step {}, train acc {:0.3f}, val acc {:0.3f}'.format(step, train_acc, val_acc))
 
     plot_samples.append(step)
@@ -152,6 +152,6 @@ for e in range(epochs):
         if i % acc_check_steps == 0:
             check_accuracy(i, batch_x, batch_a)
 
-        sess.run(train_step, feed_dict={x: batch_x, a: batch_a})
+        sess.run(train_step, feed_dict={x: batch_x, expect: batch_a})
 
     check_test()
