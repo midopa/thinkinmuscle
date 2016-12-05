@@ -36,13 +36,16 @@ def max_pool(x):
 mnist = input_data.read_data_sets('mnist_data', one_hot=True)
 
 learning_rate = 1e-4
-epochs = 3
+epochs = 30
 batch_size = 50
-iterations = int(mnist.train.num_examples/batch_size)
+train_size = mnist.train.num_examples
+iterations = int(train_size/batch_size)
 acc_check_steps = 100
-plot_samples = []
-plot_train_acc = []
-plot_val_acc = []
+plot_samples = [0]
+plot_train_acc = [0]
+plot_val_acc = [0]
+plot_epochs = [0]
+plot_test_acc = [0]
 
 network = ThinkinMuscle()
 
@@ -105,24 +108,28 @@ correct_prediction = tf.equal(tf.argmax(a, 1), tf.argmax(expect, 1))
 accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
 
 
-def check_test():
+def check_test(epoch):
     log.info('checking against test set...')
     test_acc = accuracy.eval(feed_dict={x: mnist.test.images, expect: mnist.test.labels})
     log.info('done, test acc {:0.3f}'.format(test_acc))
 
+    plot_epochs.append(train_size/batch_size * (epoch + 1))
+    plot_test_acc.append(test_acc)
 
-def check_accuracy(step, in_x, actual):
+
+def check_accuracy(epoch, step, in_x, actual):
     train_acc = accuracy.eval(feed_dict={x: in_x, expect: actual})
     in_x, actual = mnist.validation.next_batch(batch_size)
     val_acc = accuracy.eval(feed_dict={x: in_x, expect: actual})
     log.debug('step {}, train acc {:0.3f}, val acc {:0.3f}'.format(step, train_acc, val_acc))
 
-    plot_samples.append(step)
+    plot_samples.append(train_size/batch_size*epoch + step)
     plot_train_acc.append(train_acc)
     plot_val_acc.append(val_acc)
     pyplot.cla()
-    pyplot.plot(plot_samples, plot_train_acc, 'b-+', label='training acc')
-    pyplot.plot(plot_samples, plot_val_acc, 'r-+', label='val acc')
+    pyplot.plot(plot_samples, plot_train_acc, 'b--+', label='training acc')
+    pyplot.plot(plot_samples, plot_val_acc, 'r--+', label='val acc')
+    pyplot.plot(plot_epochs, plot_test_acc, 'g-+', label='test acc')
     pyplot.legend(loc='lower right')
     pyplot.pause(1e-3)
 
@@ -133,7 +140,7 @@ def signal_handler(sig_num, frame):
     test set.
     """
     log.info('aborted')
-    check_test()
+    check_test(0)
     sys.exit(1)
 signal.signal(signal.SIGINT, signal_handler)
 
@@ -141,17 +148,12 @@ sess = tf.InteractiveSession()
 tf.global_variables_initializer().run()
 
 for e in range(epochs):
-    plot_samples.clear()
-    plot_train_acc.clear()
-    plot_val_acc.clear()
-    pyplot.cla()
-
     for i in range(iterations):
         batch_x, batch_a = mnist.train.next_batch(batch_size)
 
         if i % acc_check_steps == 0:
-            check_accuracy(i, batch_x, batch_a)
+            check_accuracy(e, i, batch_x, batch_a)
 
         sess.run(train_step, feed_dict={x: batch_x, expect: batch_a})
 
-    check_test()
+    check_test(e)
