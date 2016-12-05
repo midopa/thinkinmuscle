@@ -46,9 +46,7 @@ plot_val_acc = []
 
 network = ThinkinMuscle()
 
-# reshape input image into an actual image for convolution layers
 x = tf.placeholder(tf.float32, [None, 784])
-x_img = tf.reshape(x, [-1, 28, 28, 1])
 # expected output, labels
 expect = tf.placeholder(tf.float32, [None, 10])
 
@@ -72,11 +70,12 @@ expect = tf.placeholder(tf.float32, [None, 10])
 # )
 
 # convolution and max pooling
+# reshape input vector into an image for convolution layers
 # 5x5 patches, output 32 features
 network.add_layer(
     [5, 5, 1, 32],
     lambda y, W, b: max_pool(tf.nn.relu(conv(y, W) + b)),
-    input_override=x_img
+    input_override=tf.reshape(x, [-1, 28, 28, 1])
 )
 # convolution and max pooling
 network.add_layer(
