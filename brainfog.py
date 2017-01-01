@@ -1,4 +1,5 @@
 # some example code to run tensorflow in limited capacity
+# documentation: https://github.com/tensorflow/tensorflow/blob/master/tensorflow/core/protobuf/config.proto#L170
 import tensorflow as tf
 
 # define the model
