@@ -23,6 +23,7 @@ matplotlib.use('tkagg')
 # important for this to be after setting the backend
 from matplotlib import pyplot
 pyplot.ion()
+do_plot = False
 
 
 def conv(x, W):
@@ -113,6 +114,9 @@ def check_test(epoch):
     test_acc = accuracy.eval(feed_dict={x: mnist.test.images, expect: mnist.test.labels})
     log.info('done, test acc {:0.3f}'.format(test_acc))
 
+    if not do_plot:
+        return
+
     plot_epochs.append(train_size/batch_size * (epoch + 1))
     plot_test_acc.append(test_acc)
 
@@ -122,6 +126,9 @@ def check_accuracy(epoch, step, in_x, actual):
     in_x, actual = mnist.validation.next_batch(batch_size)
     val_acc = accuracy.eval(feed_dict={x: in_x, expect: actual})
     log.debug('step {}, train acc {:0.3f}, val acc {:0.3f}'.format(step, train_acc, val_acc))
+
+    if not do_plot:
+        return
 
     plot_samples.append(train_size/batch_size*epoch + step)
     plot_train_acc.append(train_acc)
