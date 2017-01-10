@@ -40,7 +40,7 @@ class RunFile(FileSystemEventHandler):
         print('Running: {}'.format(file))
 
         with open(log, 'w') as log:
-            subprocess.call(['python', filepath], stderr=subprocess.PIPE, stdout=log)
+            subprocess.call(['python', filepath], stderr=subprocess.STDOUT, stdout=log)
         shutil.move(filepath, os.path.join(SEARCH_PATH, COMPLETE_SUBDIR, file))
 
         print('Done')
