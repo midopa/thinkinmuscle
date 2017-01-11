@@ -35,9 +35,12 @@ class RunFile(FileSystemEventHandler):
 
         file = files[0]
         filepath = os.path.join(SEARCH_PATH, file)
+        filepath = os.path.abspath(filepath)
         log = '{}-results-{}.txt'.format(time.strftime('%y%m%d-%H%M%S'), file)
         log = os.path.join(SEARCH_PATH, RESULTS_SUBDIR, log)
+        log = os.path.abspath(log)
         print('Running: {}'.format(file))
+        print('Saving output to: {}'.format(log))
 
         with open(log, 'w') as log:
             subprocess.call(['python', filepath], stderr=subprocess.STDOUT, stdout=log)
