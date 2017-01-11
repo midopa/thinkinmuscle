@@ -39,7 +39,7 @@ class RunFile(FileSystemEventHandler):
         script_filepath = os.path.join(abs_search_path, file)
         log_filepath = '{}-results-{}.txt'.format(time.strftime('%y%m%d-%H%M%S'), file)
         log_filepath = os.path.join(abs_search_path, RESULTS_SUBDIR, log_filepath)
-        print('Running: {}'.format(file))
+        print('Running: {}'.format(script_filepath))
         print('Saving output to: {}'.format(log_filepath))
 
         with open(log_filepath, 'w') as log:
