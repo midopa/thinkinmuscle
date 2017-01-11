@@ -22,6 +22,7 @@ RESULTS_SUBDIR = 'results'
 # folder to store done scripts
 # this will be placed under the search path
 COMPLETE_SUBDIR = 'done'
+abs_search_path = os.path.abspath(SEARCH_PATH)
 
 
 class RunFile(FileSystemEventHandler):
@@ -29,29 +30,28 @@ class RunFile(FileSystemEventHandler):
         super().__init__()
 
     def on_modified(self, event: FileModifiedEvent):
-        files = [f for f in os.listdir(SEARCH_PATH) if re.match('.*run.*\.py$', f)]
+        files = [f for f in os.listdir(abs_search_path) if re.match('.*run.*\.py$', f)]
         if len(files) == 0:
             return
 
+        # just take the first for now
         file = files[0]
-        filepath = os.path.join(SEARCH_PATH, file)
-        filepath = os.path.abspath(filepath)
-        log = '{}-results-{}.txt'.format(time.strftime('%y%m%d-%H%M%S'), file)
-        log = os.path.join(SEARCH_PATH, RESULTS_SUBDIR, log)
-        log = os.path.abspath(log)
+        script_filepath = os.path.join(abs_search_path, file)
+        log_filepath = '{}-results-{}.txt'.format(time.strftime('%y%m%d-%H%M%S'), file)
+        log_filepath = os.path.join(abs_search_path, RESULTS_SUBDIR, log_filepath)
         print('Running: {}'.format(file))
-        print('Saving output to: {}'.format(log))
+        print('Saving output to: {}'.format(log_filepath))
 
-        with open(log, 'w') as log:
-            subprocess.call(['python', filepath], stderr=subprocess.STDOUT, stdout=log)
-        shutil.move(filepath, os.path.join(SEARCH_PATH, COMPLETE_SUBDIR, file))
+        with open(log_filepath, 'w') as log:
+            subprocess.call(['python', script_filepath], stderr=subprocess.STDOUT, stdout=log)
+        shutil.move(script_filepath, os.path.join(abs_search_path, COMPLETE_SUBDIR, file))
 
         print('Done')
 
 
 # make sure the results and done subdirs exist
-os.makedirs(os.path.join(SEARCH_PATH, RESULTS_SUBDIR), exist_ok=True)
-os.makedirs(os.path.join(SEARCH_PATH, COMPLETE_SUBDIR), exist_ok=True)
+os.makedirs(os.path.join(abs_search_path, RESULTS_SUBDIR), exist_ok=True)
+os.makedirs(os.path.join(abs_search_path, COMPLETE_SUBDIR), exist_ok=True)
 
 obv = observers.Observer()
 obv.schedule(RunFile(), SEARCH_PATH, recursive=False)
