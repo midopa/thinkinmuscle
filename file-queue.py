@@ -35,7 +35,7 @@ class RunFile(FileSystemEventHandler):
 
         file = files[0]
         filepath = os.path.join(SEARCH_PATH, file)
-        log = '{} results {}.txt'.format(time.strftime('%y%m%d %H%M%S'), file)
+        log = '{}-results-{}.txt'.format(time.strftime('%y%m%d-%H%M%S'), file)
         log = os.path.join(SEARCH_PATH, RESULTS_SUBDIR, log)
         print('Running: {}'.format(file))
 
