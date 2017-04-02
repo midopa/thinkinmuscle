@@ -101,7 +101,7 @@ network.add_layer(
 
 # training
 a = network.output()
-cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(a, expect))
+cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=a, labels=expect))
 train_step = tf.train.AdamOptimizer(learning_rate).minimize(cross_entropy)
 
 # debugging
